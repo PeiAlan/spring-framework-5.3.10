@@ -182,18 +182,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock
+		// 根据beanName去缓存中拿实例，
+		// 先从一级缓存（singletonObjects）ConcurrentHashMap 中拿
 		Object singletonObject = this.singletonObjects.get(beanName);
+		// 如果bean还正在创建。还没创建完成，其实就是 堆内存中已经有了，只是属性还没有DI依赖注入，属于不完成品
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			// 去二级缓存（earlySingletonObjects）中拿
 			singletonObject = this.earlySingletonObjects.get(beanName);
+			// 如果类 允许了提前暴露，尝试去取 残次品实例
 			if (singletonObject == null && allowEarlyReference) {
+				// 加锁。再次去一二级缓存中获取实例，因为防止别的线程同时已经在缓存池中添加了
 				synchronized (this.singletonObjects) {
 					// Consistent creation of early reference within full singleton lock
+					// 单例锁中，再次尝试去一级缓存中拿
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
+						// 一级缓存中还是没拿到，就再次去二级缓存中拿
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							// 二级缓存中还是没拿到，就去三级缓存（new HashMap）中拿，拿到残次品
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
+								// 调用实现类的 getObject方法
 								singletonObject = singletonFactory.getObject();
 								this.earlySingletonObjects.put(beanName, singletonObject);
 								this.singletonFactories.remove(beanName);

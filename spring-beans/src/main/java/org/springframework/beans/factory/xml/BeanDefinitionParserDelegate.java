@@ -1372,6 +1372,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
+	 * 自定义标签解析
 	 * Parse a custom element (outside of the default namespace).
 	 * @param ele the element to parse
 	 * @param containingBd the containing bean definition (if any)
@@ -1379,6 +1380,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		// 获取 namespace URI
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;

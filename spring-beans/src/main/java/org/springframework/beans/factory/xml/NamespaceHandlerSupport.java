@@ -64,6 +64,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 
 
 	/**
+	 * 委托模式 把标签解析委托出去给 ComponentScanBeanDefinitionParser 等第三方处理 处理
 	 * Parses the supplied {@link Element} by delegating to the {@link BeanDefinitionParser} that is
 	 * registered for that {@link Element}.
 	 */

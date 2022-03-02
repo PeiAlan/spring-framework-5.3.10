@@ -255,6 +255,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object beanInstance;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// 解决循环依赖的
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -273,6 +274,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
+			// 缓存中没取到，走下来去创建bean
+			// 如果是 scope 是prototype的，检查是否有出现循环依赖，如果有直接报错
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
@@ -316,6 +319,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				// 获取类上DependOn 标注的依赖属性，依赖对象要先实例化
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					// dependsOn表示当前beanName所依赖的，当前Bean创建之前dependsOn所依赖的Bean必须已经创建好了
@@ -343,6 +347,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							// 实例化的核心方法
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
@@ -1007,6 +1012,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (bpCache == null) {
 			bpCache = new BeanPostProcessorCache();
 			for (BeanPostProcessor bp : this.beanPostProcessors) {
+				// 按照四种接口，把实现类分开存放在不同的集合中
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					bpCache.instantiationAware.add((InstantiationAwareBeanPostProcessor) bp);
 					if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {

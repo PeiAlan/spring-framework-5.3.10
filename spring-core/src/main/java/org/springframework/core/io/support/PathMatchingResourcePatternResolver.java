@@ -513,6 +513,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
 			}
 			else {
+				// 查找路径匹配文件资源 并添加到 Set<Resource> result
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
 			}
 		}
@@ -715,6 +716,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return Collections.emptySet();
 		}
+		//查找匹配的文件系统资源
 		return doFindMatchingFileSystemResources(rootDir, subPattern);
 	}
 
@@ -732,6 +734,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isTraceEnabled()) {
 			logger.trace("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
+		// 检索匹配文件
 		Set<File> matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
 		Set<Resource> result = new LinkedHashSet<>(matchingFiles.size());
 		for (File file : matchingFiles) {

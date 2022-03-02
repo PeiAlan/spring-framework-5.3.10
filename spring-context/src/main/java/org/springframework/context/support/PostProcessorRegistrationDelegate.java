@@ -108,14 +108,19 @@ final class PostProcessorRegistrationDelegate {
 			// uninitialized to let the bean factory post-processors apply to them!
 			// Separate between BeanDefinitionRegistryPostProcessors that implement
 			// PriorityOrdered, Ordered, and the rest.
+			// 不要在此处初始化 FactoryBeans：我们需要让所有常规 bean 保持未初始化状态，
+			// 以便 bean 工厂后处理器应用到它们！
+			// 将实现 PriorityOrdered、Ordered 和其余部分的 BeanDefinitionRegistryPostProcessor 分开。
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// 执行扫描出来的BeanDefinitionRegistryPostProcessor
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			// 根据接口类型 BeanDefinitionRegistryPostProcessor  去获取所有的beanDefinition的名称
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				// 判断类是否实现了 PriorityOrdered 这个接口
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
@@ -130,8 +135,10 @@ final class PostProcessorRegistrationDelegate {
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
 			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				// 判断类是否实现了 Ordered 这个接口
 				// processedBeans表示该beanFactoryPostProcessor的postProcessBeanDefinitionRegistry()方法已经执行过了，不再重复执行
 				if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
+					// 把 ppName 对应的beanDefinition实例化
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
@@ -237,6 +244,7 @@ final class PostProcessorRegistrationDelegate {
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
+
 		// beanProcessorTargetCount表示BeanFactory中所有的BeanPostProcessor数量，+1表示BeanPostProcessorChecker
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
@@ -312,6 +320,7 @@ final class PostProcessorRegistrationDelegate {
 			comparatorToUse = ((DefaultListableBeanFactory) beanFactory).getDependencyComparator();
 		}
 		if (comparatorToUse == null) {
+			// 利用OrderComparator 进行排序处理。调用compare方法
 			comparatorToUse = OrderComparator.INSTANCE;
 		}
 		postProcessors.sort(comparatorToUse);

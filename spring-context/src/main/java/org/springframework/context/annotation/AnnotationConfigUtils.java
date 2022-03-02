@@ -165,6 +165,7 @@ public abstract class AnnotationConfigUtils {
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
 		// 注册ConfigurationClassPostProcessor类型的BeanDefinition
+		// 用于解析配置类的
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
@@ -172,6 +173,7 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// 注册AutowiredAnnotationBeanPostProcessor类型的BeanDefinition
+		// 处理 @Autowired @Value 注解
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
@@ -179,6 +181,7 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// 注册CommonAnnotationBeanPostProcessor类型的BeanDefinition
+		// 处理 @Resource @PostConstruct  @PreDestroy 注解
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);

@@ -203,7 +203,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
 
-		// 注册@Component对应的AnnotationTypeFilter
+		// 注册@Component对应的AnnotationTypeFilter, 这里不加@Service的原因是@Service注解里有 @Component 注解
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
@@ -316,6 +316,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			// 扫描 basePackage 路径下的 .class文件
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -420,9 +421,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
-			// 获取basePackage下所有的文件资源
+			// 获取basePackage下所有的class文件资源
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			// 这里通过递归找文件
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
@@ -434,7 +436,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 					try {
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						// excludeFilters、includeFilters判断
-						if (isCandidateComponent(metadataReader)) { // @Component-->includeFilters判断
+						if (isCandidateComponent(metadataReader)) {
+							// @Component-->includeFilters判断
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
 

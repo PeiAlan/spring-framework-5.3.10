@@ -551,6 +551,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			// obtainFreshBeanFactory 标签解析
 			// 这里会判断能否刷新，并且返回一个BeanFactory, 刷新不代表完全情况，主要是先执行Bean的销毁，然后重新生成一个BeanFactory，再在接下来的步骤中重新去扫描等等
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
@@ -571,6 +572,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 
 				// Invoke factory processors registered as beans in the context.
+				// 完成对 beanDefinition 的修改过程
 				// BeanFactory准备好了之后，执行BeanFactoryPostProcessor，开始对BeanFactory进行处理
 				// 默认情况下:
 				// 此时beanFactory的beanDefinitionMap中有6个BeanDefinition，5个基础BeanDefinition+AppConfig的BeanDefinition
@@ -587,21 +589,37 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Initialize message source for this context.
 				// 设置ApplicationContext的MessageSource，要么是用户设置的，要么是DelegatingMessageSource
+				/**
+				 * 国际化设置
+				 */
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
 				// 设置ApplicationContext的applicationEventMulticaster，么是用户设置的，要么是SimpleApplicationEventMulticaster
+				/**
+				 * 初始化事件管理类
+				 */
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
-				// 给子类的模板方法
+				// 给子类的模板方法，SpringBoot在这自己实现了内置的Tomcat的启动
 				onRefresh();
 
 				// Check for listener beans and register them.
 				// 把定义的ApplicationListener的Bean对象，设置到ApplicationContext中去，并执行在此之前所发布的事件
+				/**
+				 * 往事件管理器中注册事件类
+				 */
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				/**
+				 * 1、完成bean实例化
+				 * 2、IOC
+				 * 3、注解支持
+				 * 4、BeanPostProcessor的执行
+				 * 5、Aop的入口
+				 */
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -929,6 +947,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Initialize conversion service for this context.
 		// 如果BeanFactory中存在名字叫conversionService的Bean,则设置为BeanFactory的conversionService属性
 		// ConversionService是用来进行类型转化的
+		// 设置类型转换器
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
 			beanFactory.setConversionService(
@@ -956,7 +975,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
-		// 实例化非懒加载的单例Bean
+		/**
+		 * 实例化非懒加载的单例Bean 的前置处理事件
+		 */
 		beanFactory.preInstantiateSingletons();
 	}
 
