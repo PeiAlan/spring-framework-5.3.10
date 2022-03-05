@@ -102,7 +102,7 @@ public class InjectionMetadata {
 		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
 		for (InjectedElement element : this.injectedElements) {
 			Member member = element.getMember();
-			// 将Field或Method记录到BeanDefinition中的externallyManagedConfigMembers中，表示该Field或Method是BeanFactory外部管理的
+			// 将Field或Method记录到BeanDefinition中的 externallyManagedConfigMembers 中，表示该Field或Method是 BeanFactory 外部管理的
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
 				beanDefinition.registerExternallyManagedConfigMember(member);
 				checkedElements.add(element);

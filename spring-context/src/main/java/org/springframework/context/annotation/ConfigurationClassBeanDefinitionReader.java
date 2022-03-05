@@ -153,11 +153,12 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		// @Bean生成BeanDefinition并注册
+		// @Bean标签实现原理
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
-		// 处理@ImportResource("spring.xml")
+		// 处理@ImportResource("spring.xml")，就是xml解析
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 
 		// 处理ImportBeanDefinitionRegistrar，调用registerBeanDefinitions()方法

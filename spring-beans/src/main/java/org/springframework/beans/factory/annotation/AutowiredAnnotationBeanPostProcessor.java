@@ -18,12 +18,7 @@ package org.springframework.beans.factory.annotation;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,10 +53,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -268,11 +260,12 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					do {
 						// 遍历targetClass中的method，查看是否写了@Lookup方法
 						ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+							// 对了LookUp注解的支持
 							Lookup lookup = method.getAnnotation(Lookup.class);
 							if (lookup != null) {
 								Assert.state(this.beanFactory != null, "No BeanFactory available");
 
-								// 将当前method封装成LookupOverride并设置到BeanDefinition的methodOverrides中
+								// 将当前 method 封装成 LookupOverride 并设置到 BeanDefinition 的 methodOverrides 中
 								LookupOverride override = new LookupOverride(method, lookup.value());
 								try {
 									RootBeanDefinition mbd = (RootBeanDefinition)
@@ -334,7 +327,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 							continue;
 						}
 
-						// 当前遍历的构造方法是否写了@Autowired
+						// 当前遍历的构造方法是否写了 @Autowired
 						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);
 						if (ann == null) {
 							// 如果beanClass是代理类，则得到被代理的类的类型
@@ -566,10 +559,15 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		return InjectionMetadata.forElements(elements, clazz);
 	}
 
+	// AccessibleObject是构造函数的父类
 	@Nullable
 	private MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject ao) {
 		MergedAnnotations annotations = MergedAnnotations.from(ao);
+		// 这个类在初始化的时候就已经在 autowiredAnnotationTypes 这个set集合中添加了 @Autowried  @Value 注解
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+			// 5.2.8版本是这么写的
+			//AnnotationAttributes mergedAnnotationAttributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
+			// 这里5.3版本 这里调用到了  TypeMappedAnnotations
 			MergedAnnotation<?> annotation = annotations.get(type);
 			if (annotation.isPresent()) {
 				return annotation;

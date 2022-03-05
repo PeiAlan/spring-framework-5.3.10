@@ -99,7 +99,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
 				if (object == null) {
-					// 执行getObject()方法，返回的object不可能为null（会返回NullBean）
+					// 执行 getObject() 方法，返回的object不可能为null（会返回NullBean）
 					object = doGetObjectFromFactoryBean(factory, beanName);
 					// Only post-process and store if not put there already during getObject() call above
 					// (e.g. because of circular reference processing triggered by custom getBean calls)
@@ -111,8 +111,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 						if (shouldPostProcess) {
 							if (isSingletonCurrentlyInCreation(beanName)) {
 								// Temporarily return non-post-processed object, not storing it yet..
+								// 如果正在创建，就直接返回bean
 								return object;
 							}
+							// 创建bean之前。
+							// 添加 bean 到正在创建的set集合中 singletonsCurrentlyInCreation
 							beforeSingletonCreation(beanName);
 							try {
 								// getObject()方法返回的对象进行后置处理
@@ -123,6 +126,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 										"Post-processing of FactoryBean's singleton object failed", ex);
 							}
 							finally {
+								// 创建bean之后。
+								// 把 bean 从 singletonsCurrentlyInCreation 这个set集合中remove掉
 								afterSingletonCreation(beanName);
 							}
 						}
@@ -169,6 +174,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				}
 			}
 			else {
+				// 调用 getObject(); 方法
 				object = factory.getObject();
 			}
 		}

@@ -942,6 +942,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 
 			// 不是抽象  必须是单例的，不是懒加载的
+			// 有@Lazy注解的类，在这里不会getbean，调用时需要自己手动getbean
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 				if (isFactoryBean(beanName)) {
 					// 获取FactoryBean对象
@@ -1058,8 +1059,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else {
+				// 把 beanDefinition 缓存到map中去
 				// Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
+
+				// 把 beanName 放到 beanDefinitionNames list集合中，这个list，在bean实例化时会用到
 				this.beanDefinitionNames.add(beanName);
 				removeManualSingletonName(beanName);
 			}

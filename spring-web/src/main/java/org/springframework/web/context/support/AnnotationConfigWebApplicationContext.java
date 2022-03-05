@@ -203,6 +203,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		if (beanNameGenerator != null) {
 			reader.setBeanNameGenerator(beanNameGenerator);
 			scanner.setBeanNameGenerator(beanNameGenerator);
+			// 注册单例  BeanNameGenerator
 			beanFactory.registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
 		}
 
@@ -217,6 +218,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 				logger.debug("Registering component classes: [" +
 						StringUtils.collectionToCommaDelimitedString(this.componentClasses) + "]");
 			}
+			// 这时候去注册  componentClasses 集合中的所有class
 			reader.register(ClassUtils.toClassArray(this.componentClasses));
 		}
 
@@ -225,6 +227,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 				logger.debug("Scanning base packages: [" +
 						StringUtils.collectionToCommaDelimitedString(this.basePackages) + "]");
 			}
+			// 扫描 basePackage 下所有的类
 			scanner.scan(StringUtils.toStringArray(this.basePackages));
 		}
 

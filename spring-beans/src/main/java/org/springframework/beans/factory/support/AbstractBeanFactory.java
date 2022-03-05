@@ -255,7 +255,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object beanInstance;
 
 		// Eagerly check singleton cache for manually registered singletons.
-		// 解决循环依赖的
+		// 去缓存中 取 beanDefinition
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -343,7 +343,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					}
 				}
 
-				// Create bean instance.
+				// Create bean instance. 创建bean实例对象
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
@@ -358,13 +358,18 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw ex;
 						}
 					});
+					// 是FactoryBean接口的调用入口
 					beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				}
 				else if (mbd.isPrototype()) {
+					/**
+					 * 多例的处理方式，自定义scope管理bean
+					 */
 					// It's a prototype -> create a new instance.
 					Object prototypeInstance = null;
 					try {
 						beforePrototypeCreation(beanName);
+						// 每次getbean都会执行创建，不会加入到缓存
 						prototypeInstance = createBean(beanName, mbd, args);
 					}
 					finally {
@@ -1923,6 +1928,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 			// synthetic为true，表示这个Bean不是正常的一个Bean，可能只是起到辅助作用的，所以这种Bean就不用去执行PostProcessor了
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			// 从 实现了 FactoryBean 接口的 bean中获取对象， 通过调用getObject方法
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

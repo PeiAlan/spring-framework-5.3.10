@@ -553,6 +553,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Tell the subclass to refresh the internal bean factory.
 			// obtainFreshBeanFactory 标签解析
 			// 这里会判断能否刷新，并且返回一个BeanFactory, 刷新不代表完全情况，主要是先执行Bean的销毁，然后重新生成一个BeanFactory，再在接下来的步骤中重新去扫描等等
+			// 就是去扫描所有的类，如果是xml就按照xml形式去扫描，如果是注解，就按照注解类的形式去扫描，然后注册
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -709,6 +710,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		// 刷新beanfactory， 这里调到 AbstractRefreshableApplicationContext 的refreshBeanFactory 方法
 		refreshBeanFactory();
 		return getBeanFactory();
 	}
